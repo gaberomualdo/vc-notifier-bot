@@ -85,6 +85,13 @@ client.on('message', (msg) => {
   }
 });
 
+const hasJoinedChannel = (memberID, channelBefore, channelAfter) => {
+  return !channelBefore.contains(memberID) && channelAfter.contains(memberID);
+};
+const hasLeftChannel = (memberID, channelBefore, channelAfter) => {
+  return channelBefore.contains(memberID) && !channelAfter.contains(memberID);
+};
+
 const notifyUsernamesInChannel = (message, guildID, options = {}) => {
   let notificationChannel = getNotificationChannel(guildID);
 
