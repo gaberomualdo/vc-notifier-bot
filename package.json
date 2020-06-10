@@ -1,0 +1,24 @@
+{
+  "name": "discord-vc-notifier",
+  "version": "1.0.0",
+  "description": "A Discord bot to notify me when people have joined the voice chat.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xtrp/discord-vc-notifier.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xtrp/discord-vc-notifier/issues"
+  },
+  "homepage": "https://github.com/xtrp/discord-vc-notifier#readme",
+  "dependencies": {
+    "config": "^3.3.1",
+    "discord.js": "^12.2.0",
+    "equations": "^1.3.6"
+  }
+}
