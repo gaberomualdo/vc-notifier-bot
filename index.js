@@ -1,4 +1,9 @@
-const config = require('config');
+// Use this line in a development environment with the bot token in a config file
+// const config = require('config');
+// const DISCORD_BOT_TOKEN = config.get('botToken');
+
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+
 const Discord = require('discord.js');
 const SimpleVoiceState = require('./SimpleVoiceState');
 
@@ -28,7 +33,6 @@ const CHANNEL_MESSAGES = {
   },
 };
 
-const DISCORD_BOT_TOKEN = config.get('botToken');
 const client = new Discord.Client();
 
 // each key is a guild, each guild is an object with channel IDs as keys,
