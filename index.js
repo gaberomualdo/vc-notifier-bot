@@ -86,6 +86,9 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 });
 
 client.on('message', (msg) => {
+  if (!msg.guild) {
+    return;
+  }
   const msgGuildID = msg.guild.id;
   const msgContent = msg.content;
   const msgSenderMemberID = msg.member.user.id;
@@ -107,6 +110,10 @@ client.on('message', (msg) => {
       msg.reply(CHANNEL_MESSAGES.textMessages['alreadyUnsubscribed']);
     }
   }
+});
+
+process.on('SIGTERM', () => {
+  console.info('SIGTERM signal received.');
 });
 
 const hasJoinedChannel = (memberID, channelBefore, channelAfter) => {
