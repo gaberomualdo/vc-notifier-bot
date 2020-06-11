@@ -1,2 +1,2 @@
 web: node webserver.js
-discordbot: node index.js
+worker: node index.js
