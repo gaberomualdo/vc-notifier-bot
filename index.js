@@ -294,3 +294,8 @@ Object.prototype.copy = function () {
 };
 
 client.login(DISCORD_BOT_TOKEN);
+
+// prevent idling
+setInterval(() => {
+  console.log('App is running...');
+}, 10000);
