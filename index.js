@@ -94,7 +94,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   );
 });
 
-client.on('message', (msg) => {
+client.on('message', async (msg) => {
   if (sigtermReceived) {
     return;
   }
@@ -102,25 +102,34 @@ client.on('message', (msg) => {
   if (!msg.guild) {
     return;
   }
+
   const msgGuildID = msg.guild.id;
+  const msgChannelID = msg.channel.id;
   const msgContent = msg.content;
   const msgSenderMemberID = msg.member.user.id;
 
   let notifiedMemberIDs = getNotifiedMemberIDs(msgGuildID);
 
-  if (msgContent.startsWith(CHANNEL_MESSAGES.flags['notificationSubscribe'])) {
+  if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationSubscribe'])) {
     if (notifiedMemberIDs.contains(msgSenderMemberID)) {
       msg.reply(CHANNEL_MESSAGES.textMessages['alreadySubscribed']);
     } else {
       addToNotifiedUserIDs(msgGuildID, msgSenderMemberID);
       msg.reply(CHANNEL_MESSAGES.textMessages['successfullySubscribed']);
     }
-  } else if (msgContent.startsWith(CHANNEL_MESSAGES.flags['notificationUnsubscribe'])) {
+  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationUnsubscribe'])) {
     if (notifiedMemberIDs.contains(msgSenderMemberID)) {
       guildNotifiedMemberIDs[msgGuildID].splice(guildNotifiedMemberIDs[msgGuildID].indexOf(msgSenderMemberID), 1);
       msg.reply(CHANNEL_MESSAGES.textMessages['successfullyUnsubscribed']);
     } else {
       msg.reply(CHANNEL_MESSAGES.textMessages['alreadyUnsubscribed']);
+    }
+  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationChannelSet'])) {
+    if (guildNotificationChannels[msgGuildID] === msgChannelID) {
+      msg.reply(CHANNEL_MESSAGES.textMessages['alreadySetAsNotificationChannel']);
+    } else {
+      guildNotificationChannels[msgGuildID] = msgChannelID;
+      msg.reply(CHANNEL_MESSAGES.textMessages['successfullySetAsNotificationChannel']);
     }
   }
 
@@ -156,6 +165,10 @@ process.on('SIGTERM', () => {
 
   sigtermReceived = true;
 });
+
+const flagMatches = (str, flag) => {
+  return str.startsWith(flag);
+};
 
 const hasJoinedChannel = (memberID, channelBefore, channelAfter) => {
   return !channelBefore.contains(memberID) && channelAfter.contains(memberID);
