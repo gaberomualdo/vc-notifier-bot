@@ -1,3 +1,5 @@
+let sigtermReceived = false;
+
 const VARIABLE_DATA_FILE_PATH = 'data/variable_data.json';
 
 const config = require('config');
@@ -40,6 +42,10 @@ client.on('ready', () => {
 });
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
+  if (sigtermReceived) {
+    return;
+  }
+
   oldState = new SimpleVoiceState(oldState);
   newState = new SimpleVoiceState(newState);
 
@@ -89,6 +95,10 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 });
 
 client.on('message', (msg) => {
+  if (sigtermReceived) {
+    return;
+  }
+
   if (!msg.guild) {
     return;
   }
@@ -130,7 +140,21 @@ client.on('message', (msg) => {
 });
 
 process.on('SIGTERM', () => {
-  saveVariableData();
+  saveVariableDataToFile(
+    {
+      guildVoiceData,
+
+      guildDisplayNames,
+      channelDisplayNames,
+      memberDisplayNames,
+
+      guildNotificationChannels,
+      guildNotifiedMemberIDs,
+    },
+    VARIABLE_DATA_FILE_PATH
+  );
+
+  sigtermReceived = true;
 });
 
 const hasJoinedChannel = (memberID, channelBefore, channelAfter) => {
