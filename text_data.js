@@ -28,4 +28,6 @@ module.exports = {
       successfullySetAsNotificationChannel: 'this is now the VC notifications channel.',
     },
   },
+  TEMPORARILY_GOING_OFFLINE_MESSAGE: '**VC Notifier bot is temporarily going offline.** We apologize for any inconvenience.',
+  BACK_ONLINE_MESSAGE: '**VC Notifier bot is online.** We apologize for any downtime and any inconvenience that may have caused.',
 };

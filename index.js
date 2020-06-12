@@ -14,6 +14,8 @@ const SimpleVoiceState = require('./SimpleVoiceState');
   DEFAULT_NOTIFICATION_CHANNEL_CREATION_DESCRIPTION,
   NOTIFICATION_CHANNEL_CREATION_MESSAGES,
   CHANNEL_MESSAGES,
+  TEMPORARILY_GOING_OFFLINE_MESSAGE,
+  BACK_ONLINE_MESSAGE,
 } = require('./text_data'));
 
 const client = new Discord.Client();
@@ -37,8 +39,15 @@ const client = new Discord.Client();
   guildNotifiedMemberIDs,
 } = getVariableDataFromFile(VARIABLE_DATA_FILE_PATH));
 
-client.on('ready', () => {
+client.on('ready', async () => {
   console.log(`Logged in as '${client.user.tag}'.`);
+
+  Object.values(guildNotificationChannels).forEach(async (notificationChannelID) => {
+    const notificationChannel = await client.channels.cache.get(notificationChannelID);
+    if (notificationChannel) {
+      await notificationChannel.send(BACK_ONLINE_MESSAGE);
+    }
+  });
 });
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
@@ -162,6 +171,10 @@ process.on('SIGTERM', () => {
     },
     VARIABLE_DATA_FILE_PATH
   );
+
+  Object.values(guildNotificationChannels).forEach((notificationChannel) => {
+    client.channels.cache.get(notificationChannel).send(TEMPORARILY_GOING_OFFLINE_MESSAGE);
+  });
 
   sigtermReceived = true;
 });
