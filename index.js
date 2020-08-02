@@ -9,14 +9,16 @@ const DISCORD_BOT_TOKEN = config.get('botToken');
 const Discord = require('discord.js');
 const SimpleVoiceState = require('./SimpleVoiceState');
 
-({
+const {
   DEFAULT_NOTIFICATION_CHANNEL_NAME,
   DEFAULT_NOTIFICATION_CHANNEL_CREATION_DESCRIPTION,
   NOTIFICATION_CHANNEL_CREATION_MESSAGES,
   CHANNEL_MESSAGES,
   TEMPORARILY_GOING_OFFLINE_MESSAGE,
   BACK_ONLINE_MESSAGE,
-} = require('./text_data'));
+  HELP_MESSAGES,
+  NEW_VERSION_FEATURES,
+} = require('./text_data');
 
 const client = new Discord.Client();
 
@@ -46,8 +48,12 @@ client.on('ready', async () => {
     const notificationChannel = await client.channels.cache.get(notificationChannelID);
     if (notificationChannel) {
       await notificationChannel.send(BACK_ONLINE_MESSAGE);
+      await notificationChannel.send(NEW_VERSION_FEATURES.join('\n'));
     }
   });
+
+  client.user.setStatus('available');
+  client.user.setActivity('vc!help for help', { type: 'WATCHING' });
 });
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
@@ -119,7 +125,9 @@ client.on('message', async (msg) => {
 
   let notifiedMemberIDs = getNotifiedMemberIDs(msgGuildID);
 
-  if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationSubscribe'])) {
+  if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['help'])) {
+    msg.reply(HELP_MESSAGES.join('\n\n'));
+  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationSubscribe'])) {
     if (notifiedMemberIDs.contains(msgSenderMemberID)) {
       msg.reply(CHANNEL_MESSAGES.textMessages['alreadySubscribed']);
     } else {
@@ -249,8 +257,10 @@ const createAndGetNotificationChannel = async (guildID) => {
   const guild = client.guilds.cache.get(guildID);
   if (guild) {
     const notificationChannel = await guild.channels.create(DEFAULT_NOTIFICATION_CHANNEL_NAME, {
+      type: 'text',
       reason: DEFAULT_NOTIFICATION_CHANNEL_CREATION_DESCRIPTION,
     });
+
     const notificationChannelID = notificationChannel.id;
 
     guildNotificationChannels[guildID] = notificationChannelID;

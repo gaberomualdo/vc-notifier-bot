@@ -1,3 +1,4 @@
 node_modules/
 .DS_Store
 config/default.json
+data/variable_data.json
