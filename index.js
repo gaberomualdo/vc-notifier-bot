@@ -41,6 +41,8 @@ const client = new Discord.Client();
   guildNotifiedMemberIDs,
 } = getVariableDataFromFile(VARIABLE_DATA_FILE_PATH));
 
+const sentNewVersionFeaturesMessage = false;
+
 client.on('ready', async () => {
   console.log(`Logged in as '${client.user.tag}'.`);
 
@@ -48,9 +50,15 @@ client.on('ready', async () => {
     const notificationChannel = await client.channels.cache.get(notificationChannelID);
     if (notificationChannel) {
       await notificationChannel.send(BACK_ONLINE_MESSAGE);
-      await notificationChannel.send(NEW_VERSION_FEATURES.join('\n'));
+      if (process.argv.indexOf('--new-release') > -1 && sentNewVersionFeaturesMessage === false) {
+        await notificationChannel.send(NEW_VERSION_FEATURES.join('\n'));
+      }
     }
   });
+
+  if (process.argv.indexOf('--new-release') > -1) {
+    sentNewVersionFeaturesMessage = true;
+  }
 
   client.user.setStatus('available');
   client.user.setActivity('vc!help for help', { type: 'WATCHING' });
