@@ -10,6 +10,7 @@ VC Notifier bot allows users to be notified when others join or leave voice chan
 <div align="center">
   <img alt="Bot Demo" src="demo.png" />
 </div>
+
 ## Features
 
  - Creates a VC Notifications channel to send notifications on (although this channel can be changed)
