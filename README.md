@@ -2,7 +2,7 @@
 
 VC Notifier bot allows users to be notified when others join or leave voice channel(s).
 
-[Add Bot to Your Server](https://discord.com/oauth2/authorize?client_id=719725777997922396&permissions=50333712&scope=bot)
+<h3 align="center">[Add Bot to Your Server](https://discord.com/oauth2/authorize?client_id=719725777997922396&permissions=50333712&scope=bot)</h3>
 
 ![Bot Demo](demo.png)
 
