@@ -30,6 +30,7 @@ class SimpleVoiceState {
       id: this.voiceState.member.id,
       displayName: this.voiceState.member.displayName,
       tag: this.voiceState.member.user.tag,
+      bot: this.voiceState.member.user.bot,
     };
   }
 

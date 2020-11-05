@@ -78,6 +78,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     const guildID = newState.getGuild().id;
     const channelID = newState.getChannel().id;
     const memberID = newState.getMember().id;
+    const memberBot = newState.getMember().bot;
 
     updateNameData(newState);
 
@@ -85,7 +86,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     addMemberToChannel(guildID, channelID, memberID);
     const channelAfter = getChannelData(guildID, channelID).copy();
 
-    if (hasJoinedChannel(memberID, channelBefore, channelAfter)) {
+    if (!memberBot && hasJoinedChannel(memberID, channelBefore, channelAfter)) {
       const message = `${memberDisplayNames[memberID]} has joined voice chat ${channelDisplayNames[channelID]}.`;
       await notifyMembers(message, guildID, { omittedMemberID: memberID });
     }
@@ -93,12 +94,13 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     const guildID = oldState.getGuild().id;
     const channelID = oldState.getChannel().id;
     const memberID = oldState.getMember().id;
+    const memberBot = newState.getMember().bot;
 
     const channelBefore = getChannelData(guildID, channelID).copy();
     removeMemberFromChannel(guildID, channelID, memberID);
     const channelAfter = getChannelData(guildID, channelID).copy();
 
-    if (hasLeftChannel(memberID, channelBefore, channelAfter)) {
+    if (!memberBot && hasLeftChannel(memberID, channelBefore, channelAfter)) {
       const message = `${memberDisplayNames[memberID]} has left voice chat ${channelDisplayNames[channelID]}.`;
       notifyMembers(message, guildID, { omittedMemberID: memberID });
     }
