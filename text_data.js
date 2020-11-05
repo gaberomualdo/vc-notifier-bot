@@ -7,15 +7,24 @@ module.exports = {
     'Feel free to change the name of this channel to whatever you wish.',
 
     'To change the channel in which VC Notifications appear, send a message with **vc!sendnotificationshere** on that channel.',
-    'To receive VC notifications, send a message with **vc!notifyme** on any channel.',
-    'To stop receiving VC notifications, send a message with **vc!dontnotifyme** on any channel',
+
+    'To receive VC notifications for joins and leaves, send a message with **vc!notifyme** on any channel.',
+    'To receive VC notifications for only joins, send a message with **vc!notifymejoins** on any channel.',
+
+    'To stop receiving VC notifications for joins and leaves, send a message with **vc!dontnotifyme** on any channel',
+    'To stop receiving VC notifications for only joins, send a message with **vc!dontnotifymejoins** on any channel',
+
     `To get help and more information, send a message with **vc!help** on any channel.\n~~                                                                ~~`,
   ],
   HELP_MESSAGES: [
     'VC Notifier Bot is a bot which notifies users when others join voice channels.',
     'To change the channel in which VC Notifications appear, send a message with **vc!sendnotificationshere** on that channel.',
-    'To receive VC notifications, send a message with **vc!notifyme** on any channel.',
-    'To stop receiving VC notifications, send a message with **vc!dontnotifyme** on any channel',
+
+    'To receive VC notifications for joins and leaves, send a message with **vc!notifyme** on any channel.',
+    'To receive VC notifications for only joins, send a message with **vc!notifymejoins** on any channel.',
+
+    'To stop receiving VC notifications for joins and leaves, send a message with **vc!dontnotifyme** on any channel',
+    'To stop receiving VC notifications for only joins, send a message with **vc!dontnotifymejoins** on any channel',
   ],
   NEW_VERSION_FEATURES: [
     'Latest version of VC Notifier Bot contains the following changes:\n',
@@ -27,19 +36,30 @@ module.exports = {
     flags: {
       help: 'vc!help',
       notificationSubscribe: 'vc!notifyme',
+      notificationJoinsSubscribe: 'vc!notifymejoins',
       notificationUnsubscribe: 'vc!dontnotifyme',
+      notificationJoinsUnsubscribe: 'vc!dontnotifymejoins',
       notificationChannelSet: 'vc!sendnotificationshere',
     },
 
     textMessages: {
-      alreadySubscribed: 'you are already subscribed to voice chat notifications.',
-      successfullySubscribed: 'you have been subscribed to voice chat notifications.',
+      alreadySubscribed: 'you are already subscribed to voice chat notifications for joins and leaves. (test)',
+      alreadySubscribedJoins: 'you are already subscribed to voice chat notifications for joins. (test)',
+      successfullySubscribed: 'you have been subscribed to voice chat notifications for joins and leaves. (test)',
+      successfullySubscribedJoins: 'you have been subscribed to voice chat notifications for only joins. (test)',
 
-      alreadyUnsubscribed: 'you are already not subscribed to voice chat notifications.',
-      successfullyUnsubscribed: 'you have been unsubscribed from voice chat notifications.',
+      unsubscribeFromJoinsLeavesFirst:
+        'please unsubscribe from voice chat notifications for joins and leaves (use **vc!dontnotifyme**) before subscribing to only joins. (test)',
+      unsubscribeFromJoinsFirst:
+        'please unsubscribe from voice chat notifications for joins (use **vc!dontnotifymejoins**) before subscribing to both joins and leaves. (test)',
 
-      alreadySetAsNotificationChannel: 'this is already the VC notifications channel.',
-      successfullySetAsNotificationChannel: 'this is now the VC notifications channel.',
+      alreadyUnsubscribed: 'you are already not subscribed to voice chat notifications for joins and leaves. (test)',
+      alreadyUnsubscribedJoins: 'you are already not subscribed to voice chat notifications for joins. (test)',
+      successfullyUnsubscribed: 'you have been unsubscribed from voice chat notifications for joins and leaves. (test)',
+      successfullyUnsubscribedJoins: 'you have been unsubscribed from voice chat notifications for joins. (test)',
+
+      alreadySetAsNotificationChannel: 'this is already the VC notifications channel. (test)',
+      successfullySetAsNotificationChannel: 'this is now the VC notifications channel. (test)',
     },
   },
   TEMPORARILY_GOING_OFFLINE_MESSAGE: '**VC Notifier bot is temporarily going offline.** We apologize for any inconvenience.',

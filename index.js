@@ -22,9 +22,9 @@ const {
 
 const client = new Discord.Client();
 
-({ getVariableDataFromFile, saveVariableDataToFile } = require('./variableData'));
+const { getVariableDataFromFile, saveVariableDataToFile } = require('./variableData');
 
-({
+const {
   // each key is a guild, each guild is an object with channel IDs as keys,
   // and each channel has an array of member IDs
   guildVoiceData,
@@ -39,7 +39,8 @@ const client = new Discord.Client();
 
   // list of notified member IDs for each guild
   guildNotifiedMemberIDs,
-} = getVariableDataFromFile(VARIABLE_DATA_FILE_PATH));
+  guildNotifiedJoinsMemberIDs, // and for just joins
+} = getVariableDataFromFile(VARIABLE_DATA_FILE_PATH);
 
 const sentNewVersionFeaturesMessage = false;
 
@@ -78,6 +79,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     const guildID = newState.getGuild().id;
     const channelID = newState.getChannel().id;
     const memberID = newState.getMember().id;
+    const memberBot = newState.getMember().bot;
 
     updateNameData(newState);
 
@@ -85,22 +87,23 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     addMemberToChannel(guildID, channelID, memberID);
     const channelAfter = getChannelData(guildID, channelID).copy();
 
-    if (hasJoinedChannel(memberID, channelBefore, channelAfter)) {
+    if (!memberBot && hasJoinedChannel(memberID, channelBefore, channelAfter)) {
       const message = `${memberDisplayNames[memberID]} has joined voice chat ${channelDisplayNames[channelID]}.`;
-      await notifyMembers(message, guildID, { omittedMemberID: memberID });
+      await notifyMembers(message, guildID, { omittedMemberID: memberID, isJoin: true });
     }
   } else {
     const guildID = oldState.getGuild().id;
     const channelID = oldState.getChannel().id;
     const memberID = oldState.getMember().id;
+    const memberBot = newState.getMember().bot;
 
     const channelBefore = getChannelData(guildID, channelID).copy();
     removeMemberFromChannel(guildID, channelID, memberID);
     const channelAfter = getChannelData(guildID, channelID).copy();
 
-    if (hasLeftChannel(memberID, channelBefore, channelAfter)) {
+    if (!memberBot && hasLeftChannel(memberID, channelBefore, channelAfter)) {
       const message = `${memberDisplayNames[memberID]} has left voice chat ${channelDisplayNames[channelID]}.`;
-      notifyMembers(message, guildID, { omittedMemberID: memberID });
+      notifyMembers(message, guildID, { omittedMemberID: memberID, isJoin: false });
     }
   }
 
@@ -114,6 +117,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
       guildNotificationChannels,
       guildNotifiedMemberIDs,
+      guildNotifiedJoinsMemberIDs,
     },
     VARIABLE_DATA_FILE_PATH
   );
@@ -134,15 +138,34 @@ client.on('message', async (msg) => {
   const msgSenderMemberID = msg.member.user.id;
 
   let notifiedMemberIDs = getNotifiedMemberIDs(msgGuildID);
+  let notifiedJoinsMemberIDs = getNotifiedJoinsMemberIDs(msgGuildID);
 
   if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['help'])) {
     msg.reply(HELP_MESSAGES.join('\n\n'));
-  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationSubscribe'])) {
+  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationJoinsSubscribe'])) {
     if (notifiedMemberIDs.contains(msgSenderMemberID)) {
+      msg.reply(CHANNEL_MESSAGES.textMessages['unsubscribeFromJoinsLeavesFirst']);
+    } else if (notifiedJoinsMemberIDs.contains(msgSenderMemberID)) {
+      msg.reply(CHANNEL_MESSAGES.textMessages['alreadySubscribedJoins']);
+    } else {
+      addToNotifiedJoinsUserIDs(msgGuildID, msgSenderMemberID);
+      msg.reply(CHANNEL_MESSAGES.textMessages['successfullySubscribedJoins']);
+    }
+  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationSubscribe'])) {
+    if (notifiedJoinsMemberIDs.contains(msgSenderMemberID)) {
+      msg.reply(CHANNEL_MESSAGES.textMessages['unsubscribeFromJoinsFirst']);
+    } else if (notifiedMemberIDs.contains(msgSenderMemberID)) {
       msg.reply(CHANNEL_MESSAGES.textMessages['alreadySubscribed']);
     } else {
       addToNotifiedUserIDs(msgGuildID, msgSenderMemberID);
       msg.reply(CHANNEL_MESSAGES.textMessages['successfullySubscribed']);
+    }
+  } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationJoinsUnsubscribe'])) {
+    if (notifiedJoinsMemberIDs.contains(msgSenderMemberID)) {
+      guildNotifiedJoinsMemberIDs[msgGuildID].splice(guildNotifiedJoinsMemberIDs[msgGuildID].indexOf(msgSenderMemberID), 1);
+      msg.reply(CHANNEL_MESSAGES.textMessages['successfullyUnsubscribedJoins']);
+    } else {
+      msg.reply(CHANNEL_MESSAGES.textMessages['alreadyUnsubscribedJoins']);
     }
   } else if (flagMatches(msgContent, CHANNEL_MESSAGES.flags['notificationUnsubscribe'])) {
     if (notifiedMemberIDs.contains(msgSenderMemberID)) {
@@ -170,6 +193,7 @@ client.on('message', async (msg) => {
 
       guildNotificationChannels,
       guildNotifiedMemberIDs,
+      guildNotifiedJoinsMemberIDs,
     },
     VARIABLE_DATA_FILE_PATH
   );
@@ -186,6 +210,7 @@ process.on('SIGTERM', () => {
 
       guildNotificationChannels,
       guildNotifiedMemberIDs,
+      guildNotifiedJoinsMemberIDs,
     },
     VARIABLE_DATA_FILE_PATH
   );
@@ -220,31 +245,38 @@ const notifyMembers = async (message, guildID, options = {}) => {
     sendNotificationChannelCreationMessages(notificationChannel);
   }
 
-  const notifiedMemberIDs = getNotifiedMemberIDs(guildID).copy();
-
-  if (options.omittedMemberID) {
-    if (notifiedMemberIDs.contains(options.omittedMemberID)) {
-      notifiedMemberIDs.splice(notifiedMemberIDs.indexOf(options.omittedMemberID), 1);
+  const notifyMembersFromList = (notifChannel, listOfMembers, msg, omittedMember = undefined) => {
+    if (omittedMember) {
+      if (listOfMembers.contains(omittedMember)) {
+        listOfMembers.splice(listOfMembers.indexOf(omittedMember), 1);
+      }
     }
+
+    let mentions = '';
+    listOfMembers.forEach((memberID, idx) => {
+      const member = client.users.cache.get(memberID);
+      mentions += `${member}`;
+
+      if (idx === listOfMembers.length - 1) {
+        mentions += ': ';
+      } else if (idx === listOfMembers.length - 2) {
+        mentions += ', & ';
+      } else if (idx <= listOfMembers.length - 2) {
+        mentions += ', ';
+      }
+    });
+    let fullMessage = mentions + '**' + msg + '**';
+    notifChannel.send(fullMessage);
+  };
+
+  if (options.isJoin) {
+    const notificationMemberIDs = getNotifiedMemberIDs(guildID).copy();
+    const notificationJoinsMemberIDs = getNotifiedJoinsMemberIDs(guildID).copy();
+    notifyMembersFromList(notificationChannel, notificationMemberIDs.concat(notificationJoinsMemberIDs), message, options.omittedMemberID);
+  } else {
+    const notificationMemberIDs = getNotifiedMemberIDs(guildID).copy();
+    notifyMembersFromList(notificationChannel, notificationMemberIDs, message, options.omittedMemberID);
   }
-
-  let mentions = '';
-  notifiedMemberIDs.forEach((memberID, idx) => {
-    const member = client.users.cache.get(memberID);
-    mentions += `${member}`;
-
-    if (idx === notifiedMemberIDs.length - 1) {
-      mentions += ': ';
-    } else if (idx === notifiedMemberIDs.length - 2) {
-      mentions += ', & ';
-    } else if (idx <= notifiedMemberIDs.length - 2) {
-      mentions += ', ';
-    }
-  });
-
-  let fullMessage = mentions + '**' + message + '**';
-
-  notificationChannel.send(fullMessage);
 };
 
 const addToNotifiedUserIDs = (guildID, memberID) => {
@@ -254,9 +286,23 @@ const addToNotifiedUserIDs = (guildID, memberID) => {
 
   guildNotifiedMemberIDs[guildID].push(memberID);
 };
+const addToNotifiedJoinsUserIDs = (guildID, memberID) => {
+  if (!guildNotifiedJoinsMemberIDs[guildID]) {
+    guildNotifiedJoinsMemberIDs[guildID] = [];
+  }
+
+  guildNotifiedJoinsMemberIDs[guildID].push(memberID);
+};
 
 const getNotifiedMemberIDs = (guildID) => {
   const notifiedMemberIDs = guildNotifiedMemberIDs[guildID];
+  if (notifiedMemberIDs) {
+    return notifiedMemberIDs;
+  }
+  return [];
+};
+const getNotifiedJoinsMemberIDs = (guildID) => {
+  const notifiedMemberIDs = guildNotifiedJoinsMemberIDs[guildID];
   if (notifiedMemberIDs) {
     return notifiedMemberIDs;
   }

@@ -11,6 +11,7 @@ module.exports = {
 
       'guildNotificationChannels',
       'guildNotifiedMemberIDs',
+      'guildNotifiedJoinsMemberIDs',
     ];
 
     const defaultVariableData = [{}, {}, {}, {}, {}, {}];
