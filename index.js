@@ -255,6 +255,7 @@ const notifyMembers = async (message, guildID, options = {}) => {
     let mentions = '';
     listOfMembers.forEach((memberID, idx) => {
       const member = client.users.cache.get(memberID);
+      console.log(member);
       mentions += `${member}`;
 
       if (idx === listOfMembers.length - 1) {
@@ -272,7 +273,9 @@ const notifyMembers = async (message, guildID, options = {}) => {
   if (options.isJoin) {
     const notificationMemberIDs = getNotifiedMemberIDs(guildID).copy();
     const notificationJoinsMemberIDs = getNotifiedJoinsMemberIDs(guildID).copy();
-    notifyMembersFromList(notificationChannel, notificationMemberIDs.concat(notificationJoinsMemberIDs), message, options.omittedMemberID);
+    const allNotificationMemberIDs = notificationMemberIDs.concat(notificationJoinsMemberIDs);
+    console.log(allNotificationMemberIDs);
+    notifyMembersFromList(notificationChannel, allNotificationMemberIDs, message, options.omittedMemberID);
   } else {
     const notificationMemberIDs = getNotifiedMemberIDs(guildID).copy();
     notifyMembersFromList(notificationChannel, notificationMemberIDs, message, options.omittedMemberID);
