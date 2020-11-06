@@ -272,7 +272,8 @@ const notifyMembers = async (message, guildID, options = {}) => {
   if (options.isJoin) {
     const notificationMemberIDs = getNotifiedMemberIDs(guildID).copy();
     const notificationJoinsMemberIDs = getNotifiedJoinsMemberIDs(guildID).copy();
-    notifyMembersFromList(notificationChannel, notificationMemberIDs.concat(notificationJoinsMemberIDs), message, options.omittedMemberID);
+    const allNotificationMemberIDs = notificationMemberIDs.concat(notificationJoinsMemberIDs);
+    notifyMembersFromList(notificationChannel, allNotificationMemberIDs, message, options.omittedMemberID);
   } else {
     const notificationMemberIDs = getNotifiedMemberIDs(guildID).copy();
     notifyMembersFromList(notificationChannel, notificationMemberIDs, message, options.omittedMemberID);

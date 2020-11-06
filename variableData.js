@@ -14,7 +14,7 @@ module.exports = {
       'guildNotifiedJoinsMemberIDs',
     ];
 
-    const defaultVariableData = [{}, {}, {}, {}, {}, {}];
+    const defaultVariableData = [{}, {}, {}, {}, {}, {}, {}];
 
     let variableData = {};
 
