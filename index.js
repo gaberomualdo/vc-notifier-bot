@@ -258,14 +258,15 @@ const notifyMembers = async (message, guildID, options = {}) => {
       mentions += `${member}`;
 
       if (idx === listOfMembers.length - 1) {
-        mentions += ': ';
+        // mentions += ': ';
+        // mentions are now moved to the end of the message, so ':' is not needed
       } else if (idx === listOfMembers.length - 2) {
         mentions += ', & ';
       } else if (idx <= listOfMembers.length - 2) {
         mentions += ', ';
       }
     });
-    let fullMessage = mentions + '**' + msg + '**';
+    let fullMessage = '**' + msg + '**: ' + mentions;
     notifChannel.send(fullMessage);
   };
 
