@@ -266,7 +266,7 @@ const notifyMembers = async (message, guildID, options = {}) => {
         mentions += ', ';
       }
     });
-    let fullMessage = '**' + msg + '**: ' + mentions;
+    let fullMessage = '**' + msg + '** ' + mentions;
     notifChannel.send(fullMessage);
   };
 
