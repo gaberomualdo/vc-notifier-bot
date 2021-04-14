@@ -3,7 +3,7 @@
 VC Notifier bot allows users to be notified when others join or leave voice channel(s).
 
 <h3 align="center">
-  <a href="https://vcnotifier.github.io/">Learn More & Add It To A Server</a>
+  <a href="https://vcnotifierbot.github.io/">Learn More & Add It To A Server</a>
 </h3>
 
 
