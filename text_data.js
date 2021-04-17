@@ -63,5 +63,5 @@ module.exports = {
     },
   },
   TEMPORARILY_GOING_OFFLINE_MESSAGE: '**VC Notifier bot is temporarily going offline.** We apologize for any inconvenience.',
-  BACK_ONLINE_MESSAGE: '**VC Notifier bot is online.** We apologize for any downtime and any inconvenience that may have caused. Instead of a mention, you may see the text "undefined" from VC Notifier bot. To fix this problem, mention the undefined user once.',
+  BACK_ONLINE_MESSAGE: '**VC Notifier bot is online.** We apologize for any downtime and any inconvenience that may have caused. If you are not being notified when you have notifications on, simply mention yourself in a message to reset VC Notifier\'s user cache and get notified again.',
 };

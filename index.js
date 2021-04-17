@@ -245,12 +245,14 @@ const notifyMembers = async (message, guildID, options = {}) => {
     sendNotificationChannelCreationMessages(notificationChannel);
   }
 
-  const notifyMembersFromList = (notifChannel, listOfMembers, msg, omittedMember = undefined) => {
-    if (omittedMember) {
-      if (listOfMembers.contains(omittedMember)) {
-        listOfMembers.splice(listOfMembers.indexOf(omittedMember), 1);
+  const notifyMembersFromList = (notifChannel, rawListOfMembers, msg, omittedMember = undefined) => {
+    let listOfMembers = [];
+    rawListOfMembers.forEach((memberID, idx) => {
+      const member = client.users.cache.get(memberID);
+      if (member && memberID !== omittedMember) {
+        listOfMembers.push(memberID);
       }
-    }
+    });
 
     let mentions = '';
     listOfMembers.forEach((memberID, idx) => {
